@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-host
+  namespace: kubeflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-host
+  template:
+    metadata:
+      labels:
+        app: mcp-host
+    spec:
+      containers:
+      - name: host
+        image: fl-host:latest
+        command: ["python", "-m", "host.mcp_host"]
+        volumeMounts:
+        - name: output
+          mountPath: /output
+      volumes:
+      - name: output
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-host
+  namespace: kubeflow
+spec:
+  selector:
+    app: mcp-host
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080

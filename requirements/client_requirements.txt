@@ -1,0 +1,13 @@
+torch==2.3.0
+transformers==4.41.0
+peft==0.11.0
+accelerate==0.31.0
+crewai==0.67.1
+crewai-tools[mcp]==0.12.1
+mcp==0.2.0
+flwr==1.8.0
+numpy==1.26.4
+requests
+pillow
+torchvision
+transformers>=4.36.0

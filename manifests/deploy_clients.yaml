@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-client
+  namespace: kubeflow
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mcp-client
+  template:
+    metadata:
+      labels:
+        app: mcp-client
+    spec:
+      containers:
+      - name: mcp-server
+        image: fl-client:latest
+        command: ["python", "-m", "clients.client_mcp_server"]
+        env:
+        - name: CLIENT_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MCP_HOST_URL
+          value: "http://mcp-host.kubeflow.svc.cluster.local:8080"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: model
+          mountPath: /model
+        - name: output
+          mountPath: /output
+      - name: flower-client
+        image: fl-client:latest
+        command: ["python", "-m", "clients.flower_client"]
+        args: ["$(CLIENT_ID)"]
+        env:
+        - name: CLIENT_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MCP_HOST_URL
+          value: "http://mcp-host.kubeflow.svc.cluster.local:8080"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: model
+          mountPath: /model
+        - name: output
+          mountPath: /output
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: data-pvc
+      - name: model
+        persistentVolumeClaim:
+          claimName: model-pvc
+      - name: output
+        emptyDir: {}
